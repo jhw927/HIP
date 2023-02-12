@@ -1,5 +1,6 @@
 package borad.HIP.domain;
 
+import borad.HIP.dto.req.ArticleRequestDto;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
