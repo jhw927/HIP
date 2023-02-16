@@ -23,16 +23,16 @@ public class UserService {
 
         // 회원가입 진행
         // userEntityRepository에 저장
-        userEntityRepository.save(new UserEntity());
+        UserEntity userEntity = userEntityRepository.save(UserEntity.of(userName, password));
 
 
-        return new User();
+        return User.fromEntity(userEntity);
     }
     public String login(String userName, String password){
         // 회원가입 여부 체크
         UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(()->new SnsException());
         // 비밀번호 체크
-        if(!userEntity.getPasswrod().equals(password)){
+        if(!userEntity.getPassword().equals(password)){
             throw new SnsException();
         }
 
