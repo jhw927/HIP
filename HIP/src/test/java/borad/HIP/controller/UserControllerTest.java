@@ -2,6 +2,7 @@ package borad.HIP.controller;
 
 import borad.HIP.controller.request.LoginRequest;
 import borad.HIP.controller.request.UserJoinRequest;
+import borad.HIP.exception.ErrorCode;
 import borad.HIP.exception.SnsException;
 import borad.HIP.model.User;
 import borad.HIP.service.UserService;
@@ -58,7 +59,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.join(userName,password)).thenThrow(new SnsException());
+        when(userService.join(userName,password)).thenThrow(new SnsException(ErrorCode.DUPLICATED_USER_NAME,"" ));
 
         mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +88,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.login(userName,password)).thenThrow(new SnsException());
+        when(userService.login(userName,password)).thenThrow(new SnsException(ErrorCode.DUPLICATED_USER_NAME,"" ));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +101,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.login(userName,password)).thenThrow(new SnsException());
+        when(userService.login(userName,password)).thenThrow(new SnsException(ErrorCode.DUPLICATED_USER_NAME,"" ));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)

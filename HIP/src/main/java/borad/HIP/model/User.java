@@ -2,9 +2,10 @@ package borad.HIP.model;
 
 import borad.HIP.domain.UserEntity;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.sql.Timestamp;
-
+@Getter
 @AllArgsConstructor
 //UserDto
 public class User {
