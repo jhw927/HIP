@@ -29,36 +29,40 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-}
-node {
-	nodeModulesDir = file("$projectDir/front-end")
-	version = '18.3.0'
-	download = true
-}
-
-task npmBuild(type: NpmTask) {
-	args = ['run', "build"]
-}
-
-task copyFrontEnd(type: Copy) {
-	from "$projectDir/front-end/static"
-	into 'build/resources/main/static/.'
-}
-
-task cleanFrontEnd(type: Delete) {
-	delete "$projectDir/front-end/static", "$projectDir/front-end/node_modules"
-}
-
-npmBuild.dependsOn npmInstall
-copyFrontEnd.dependsOn npmBuild
-compileJava.dependsOn copyFrontEnd
-
-clean.dependsOn cleanFrontEnd
+//tasks.named('test') {
+//	useJUnitPlatform()
+//}
+//node {
+//	nodeModulesDir = file("$projectDir/front-end")
+//	version = '18.3.0'
+//	download = true
+//}
+//
+//task npmBuild(type: NpmTask) {
+//	args = ['run', "build"]
+//}
+//
+//task copyFrontEnd(type: Copy) {
+//	from "$projectDir/front-end/static"
+//	into 'build/resources/main/static/.'
+//}
+//
+//task cleanFrontEnd(type: Delete) {
+//	delete "$projectDir/front-end/static", "$projectDir/front-end/node_modules"
+//}
+//
+//npmBuild.dependsOn npmInstall
+//copyFrontEnd.dependsOn npmBuild
+//compileJava.dependsOn copyFrontEnd
+//
+//clean.dependsOn cleanFrontEnd
 
