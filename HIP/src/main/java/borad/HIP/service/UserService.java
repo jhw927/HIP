@@ -28,6 +28,11 @@ public class UserService {
     private Long expiredTimeMs;
 
     private final BCryptPasswordEncoder encoder;
+
+    public User loadUserByUserName(String userName){
+        return userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
+                new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded",userName)));
+    }
     @Transactional
     public User join(String userName,String password){
         // 회원가입하려는 userName으로 user가 있는지 조회
