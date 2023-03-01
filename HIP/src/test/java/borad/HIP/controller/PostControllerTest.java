@@ -1,8 +1,10 @@
 package borad.HIP.controller;
 
+import borad.HIP.controller.request.PostModifyRequest;
 import borad.HIP.controller.request.PostRequest;
 import borad.HIP.controller.request.UserJoinRequest;
 import borad.HIP.exception.ErrorCode;
+import borad.HIP.exception.SnsException;
 import borad.HIP.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -14,8 +16,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,5 +63,60 @@ public class PostControllerTest {
                         .content(objMapper.writeValueAsBytes(new PostRequest(title,body)))
                 ).andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
+    }
+    @Test
+    @WithMockUser
+    void 포스트수정()throws Exception{
+
+        String title = "title";
+        String body = "body";
+
+        mockMvc.perform(put("/api/v1/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objMapper.writeValueAsBytes(new PostModifyRequest(title,body)))
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+    @Test
+    @WithAnonymousUser
+    void 포스트수정시_로그인하지않은경우()throws Exception{
+
+        String title = "title";
+        String body = "body";
+        mockMvc.perform(post("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objMapper.writeValueAsBytes(new PostRequest(title,body)))
+                ).andDo(print())
+                .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
+    }
+    @Test
+    @WithMockUser
+    void 포스트수정시_본인이_작성한_글이_아닌경우()throws Exception{
+
+        String title = "title";
+        String body = "body";
+        // mocking
+        doThrow(new SnsException(ErrorCode.INVALID_PERMISSION)).when(postService).modify(eq(title),eq(body),any(),1L);
+
+        mockMvc.perform(put("/api/v1/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objMapper.writeValueAsBytes(new PostModifyRequest(title,body)))
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    @WithMockUser
+    void 포스트수정시_글이_존재하지_않는경우()throws Exception{
+
+        String title = "title";
+        String body = "body";
+
+        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).modify(eq(title),eq(body),any(),1L);
+
+        mockMvc.perform(put("/api/v1/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objMapper.writeValueAsBytes(new PostModifyRequest(title,body)))
+                ).andDo(print())
+                .andExpect(status().isNotFound());
     }
 }
