@@ -23,7 +23,7 @@ public class UserController {
         return Response.success(UserJoinResponse.fromUser(user));
     }
 
-    @PostMapping("/loin")
+    @PostMapping("/login")
     public Response<UserLoginResponse> login(@RequestBody LoginRequest req){
        String token = userService.login(req.getUserName(),req.getPassword());
        return Response.success(new UserLoginResponse(token));

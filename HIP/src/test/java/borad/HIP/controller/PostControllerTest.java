@@ -3,8 +3,11 @@ package borad.HIP.controller;
 import borad.HIP.controller.request.PostModifyRequest;
 import borad.HIP.controller.request.PostRequest;
 import borad.HIP.controller.request.UserJoinRequest;
+import borad.HIP.domain.PostEntity;
 import borad.HIP.exception.ErrorCode;
 import borad.HIP.exception.SnsException;
+import borad.HIP.fixture.PostEntityFixture;
+import borad.HIP.model.Post;
 import borad.HIP.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -71,6 +75,9 @@ public class PostControllerTest {
         String title = "title";
         String body = "body";
 
+        when(postService.modify(eq(title),eq(body),any(),any()))
+                .thenReturn(Post.fromEntity(PostEntityFixture.get("userName",1L,1L)));
+
         mockMvc.perform(put("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objMapper.writeValueAsBytes(new PostModifyRequest(title,body)))
@@ -87,7 +94,7 @@ public class PostControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objMapper.writeValueAsBytes(new PostRequest(title,body)))
                 ).andDo(print())
-                .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
+                .andExpect(status().isUnauthorized());
     }
     @Test
     @WithMockUser

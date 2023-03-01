@@ -4,6 +4,7 @@ import borad.HIP.model.User;
 import borad.HIP.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor

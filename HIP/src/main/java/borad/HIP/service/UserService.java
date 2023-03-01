@@ -6,6 +6,7 @@ import borad.HIP.exception.SnsException;
 import borad.HIP.model.User;
 import borad.HIP.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
@@ -51,7 +53,8 @@ public class UserService {
         // 회원가입 여부 체크
         UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(()->new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
         // 비밀번호 체크
-        if(encoder.matches(password,userEntity.getPassword())){
+        if(!encoder.matches(password,userEntity.getPassword())){
+
 //        if(!userEntity.getPassword().equals(password)){
             throw new SnsException(ErrorCode.INVALID_PASSWORD,"");
         }

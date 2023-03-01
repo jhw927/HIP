@@ -1,5 +1,6 @@
 package borad.HIP.service;
 
+import borad.HIP.model.Post;
 import borad.HIP.domain.PostEntity;
 import borad.HIP.domain.UserEntity;
 import borad.HIP.exception.ErrorCode;
@@ -9,8 +10,6 @@ import borad.HIP.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +27,21 @@ public class PostService {
         // 포스트 저장
         postRepository.save(PostEntity.of(title,body,user));
     }
-    public void modify(String title, String body, String userName, Long id){
+    public Post modify(String title, String body, String userName, Long id){
         // 유저확인
         UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(()->
                 new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
         // 게시글 존재확인
-        Optional<PostEntity> post = postRepository.findById(id);
+       PostEntity post = postRepository.findById(id).orElseThrow(()-> new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", id)));
         // 본인의 게시글이 맞는지 확인
+        if(post.getUser() != user){
+            throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName,id));
+        }
         //수정
+        post.setTitle(title);
+        post.setBody(body);
+
+        return Post.fromEntity(postRepository.save(post));
+
     }
 }

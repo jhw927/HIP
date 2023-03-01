@@ -4,9 +4,9 @@ import borad.HIP.domain.PostEntity;
 import borad.HIP.domain.UserEntity;
 
 public class PostEntityFixture {
-    public static PostEntity get(String userName, Long postId){
+    public static PostEntity get(String userName, Long postId, Long userId){
         UserEntity user = new UserEntity();
-        user.setId(1L);
+        user.setId(userId);
         user.setUserName(userName);
 
 
