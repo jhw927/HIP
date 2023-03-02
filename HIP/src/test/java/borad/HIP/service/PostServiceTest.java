@@ -105,4 +105,47 @@ public class PostServiceTest {
         SnsException e = Assertions.assertThrows(SnsException.class, ()-> postService.modify(title,body,userName,postId));
         Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
     }
+    @Test
+    void 포스트삭제가_성공한경우(){
+        String userName = "userName";
+        Long postId = 1L;
+
+        PostEntity postEntity = PostEntityFixture.get(userName,postId,1L);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        Assertions.assertDoesNotThrow(()-> postService.delete(userName,1L));
+    }
+
+    @Test
+    void 포스트삭제시_포스트가_존재하지않는_경우(){
+        String userName = "userName";
+        Long postId = 1L;
+
+        PostEntity postEntity = PostEntityFixture.get(userName,postId,1L);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+
+        SnsException e = Assertions.assertThrows(SnsException.class, ()-> postService.delete(userName,1L));
+        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    void 포스트삭제시_권한이_없는_경우(){
+        String userName = "userName";
+        Long postId = 1L;
+
+        PostEntity postEntity = PostEntityFixture.get(userName,postId,1L);
+        UserEntity writer = UserEntityFixture.get("writer","password",2L);
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        SnsException e = Assertions.assertThrows(SnsException.class, ()-> postService.delete(userName,1L));
+        Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
+    }
 }
