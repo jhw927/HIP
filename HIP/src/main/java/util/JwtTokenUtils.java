@@ -21,8 +21,11 @@ public class JwtTokenUtils {
 
     }
     private static Claims extractClaims(String token, String key){
-        return Jwts.parserBuilder().setSigningKey(getKey(key))
-                .build().parseClaimsJwt(token).getBody();
+        return Jwts.parserBuilder()
+                .setSigningKey(getKey(key))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public static String generateToken(String userName, String key, long expiredTimeMs){

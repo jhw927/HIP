@@ -10,15 +10,16 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "\"post\"")
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE \"post\"  SET deleted_at = NOW() where id = ? ")
+@Table(name = "\"post\"")
+@SQLDelete(sql = "UPDATE \"post\" SET deleted_at = NOW() WHERE id=?")
 @Where(clause = "deleted_at is null ")
 public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;

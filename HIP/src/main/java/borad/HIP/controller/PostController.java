@@ -19,14 +19,20 @@ public class PostController {
 
 
     @PostMapping
-    public Response<Void> create(@RequestBody PostRequest request, Authentication authentication){
+    public Response<Void> create(@RequestBody PostRequest request, Authentication authentication) {
         postService.create(request.getTitle(), request.getBody(), authentication.getName());
         return Response.success();
     }
 
     @PutMapping("/{postId}")
-    public Response<PostResponse> modify(@PathVariable Long postId, @RequestBody PostModifyRequest request, Authentication authentication){
-        Post post = postService.modify(request.getTitle(), request.getBody(), authentication.getName(),postId);
+    public Response<PostResponse> modify(@PathVariable Long postId, @RequestBody PostModifyRequest request, Authentication authentication) {
+        Post post = postService.modify(request.getTitle(), request.getBody(), authentication.getName(), postId);
         return Response.success(PostResponse.fromPost(post));
+    }
+
+    @DeleteMapping("/{postId}")
+    public Response<Void> delete(@PathVariable Long postId, Authentication authentication) {
+        postService.delete(authentication.getName(), postId);
+        return Response.success();
     }
 }
