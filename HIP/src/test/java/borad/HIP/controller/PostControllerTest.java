@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -152,25 +153,65 @@ public class PostControllerTest {
                 ).andDo(print())
                 .andExpect(status().isUnauthorized());
     }
+
     @Test
     @WithAnonymousUser
-    void 포스트삭제시_작성자와_삭제요청자가_일치하지_않은경우()throws Exception{
+    void 포스트삭제시_작성자와_삭제요청자가_일치하지_않은경우() throws Exception {
 
-        doThrow(new SnsException(ErrorCode.INVALID_PERMISSION)).when(postService).delete( any(), any());
+        doThrow(new SnsException(ErrorCode.INVALID_PERMISSION)).when(postService).delete(any(), any());
 
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isUnauthorized());
     }
+
     @Test
     @WithAnonymousUser
-    void 포스트삭제시_삭제하려는_게시글이_존재하지_않은경우()throws Exception{
-        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).delete( any(), any());
+    void 포스트삭제시_삭제하려는_게시글이_존재하지_않은경우() throws Exception {
+        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(), any());
 
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void 피드목록() throws Exception {
+
+        when(postService.list(any())).thenReturn(Page.empty());
+        mockMvc.perform(post("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 피드목록요청시_로그인하지않은경우() throws Exception {
+        mockMvc.perform(post("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
+    }
+    @Test
+    @WithMockUser
+    void 내피드목록() throws Exception {
+        when(postService.my(any(),any())).thenReturn(Page.empty());
+        mockMvc.perform(post("/api/v1/posts/my")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 내피드목록요청시_로그인하지않은경우() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/my")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
     }
 }

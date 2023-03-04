@@ -8,6 +8,8 @@ import borad.HIP.exception.SnsException;
 import borad.HIP.repository.PostEntityRepository;
 import borad.HIP.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,15 +52,21 @@ public class PostService {
     public void delete(String userName, Long postId) {
         UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(() ->
                 new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
-        try {
-
-
             PostEntity post = postRepository.findById(postId).orElseThrow(() -> new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
 
             if (post.getUser() != user) {
                 throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
             }
             postRepository.delete(post);
-        }catch (RuntimeException e){}
+    }
+    public Page<Post> list(Pageable pageable){
+        return postRepository.findAll(pageable).map(Post::fromEntity);
+    }
+
+    public Page<Post> my(String userName,Pageable pageable){
+        UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+                new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+
+        return postRepository.findAllByUser(user,pageable).map(Post::fromEntity);
     }
 }

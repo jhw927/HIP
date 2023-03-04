@@ -15,6 +15,8 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -147,5 +149,18 @@ public class PostServiceTest {
 
         SnsException e = Assertions.assertThrows(SnsException.class, ()-> postService.delete(userName,1L));
         Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
+    }
+    @Test
+    void 피드목록요청이_성공한경우(){
+        Pageable pageable = mock(Pageable.class);
+        when(postEntityRepository.findAll(pageable)).thenReturn(Page.empty());
+        Assertions.assertDoesNotThrow(()->postService.list(pageable));
+    }
+
+    @Test
+    void 내피드목록요청이_성공한경우(){
+        Pageable pageable = mock(Pageable.class);
+        when(postEntityRepository.findAllByUser(any(),pageable)).thenReturn(Page.empty());
+        Assertions.assertDoesNotThrow(()->postService.list(pageable));
     }
 }

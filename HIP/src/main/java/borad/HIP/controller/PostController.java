@@ -7,6 +7,8 @@ import borad.HIP.controller.response.Response;
 import borad.HIP.model.Post;
 import borad.HIP.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,5 +36,14 @@ public class PostController {
     public Response<Void> delete(@PathVariable Long postId, Authentication authentication) {
         postService.delete(authentication.getName(), postId);
         return Response.success();
+    }
+
+    @GetMapping
+    public Response<Page<PostResponse>> list(Pageable pageable, Authentication auth){
+        return Response.success(postService.list(pageable).map(PostResponse::fromPost));
+    }
+    @GetMapping("/my")
+    public Response<Page<PostResponse>> my(Pageable pageable, Authentication auth){
+        return Response.success(postService.my(auth.getName(), pageable).map(PostResponse::fromPost));
     }
 }
