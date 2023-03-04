@@ -19,13 +19,13 @@ public class UserController {
 
     @PostMapping("/join")
     public Response <UserJoinResponse> join(@RequestBody UserJoinRequest req){
-        User user = userService.join(req.getUserName(), req.getPassword());
+        User user = userService.join(req.getName(), req.getPassword());
         return Response.success(UserJoinResponse.fromUser(user));
     }
 
     @PostMapping("/login")
     public Response<UserLoginResponse> login(@RequestBody LoginRequest req){
-       String token = userService.login(req.getUserName(),req.getPassword());
+       String token = userService.login(req.getName(),req.getPassword());
        return Response.success(new UserLoginResponse(token));
     }
 }

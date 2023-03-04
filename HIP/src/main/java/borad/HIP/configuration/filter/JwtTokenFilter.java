@@ -28,17 +28,19 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final UserService userService;
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 토큰 claims에 넣은 유저네임을 꺼내서 사용
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        //get header
-        final  String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        try {
         if(header == null || !header.startsWith("Bearer ")){
             log.error("Error occurs while getting headers");
             filterChain.doFilter(request, response);
             return;
         }
-        try {
+
             final String token = header.split(" ")[1].trim();
 
             //TODO : check token is valid
@@ -55,6 +57,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(user,null, user.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }catch (RuntimeException e){
