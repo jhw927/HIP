@@ -13,12 +13,12 @@ import java.time.Instant;
 @Getter
 @Setter
 @Table(name = "\"post\"")
-@SQLDelete(sql = "UPDATE \"post\" SET deleted_at = NOW() WHERE id=?")
-@Where(clause = "deleted_at is null ")
+@SQLDelete(sql = "UPDATE post SET deleted_at = NOW() WHERE id=?")
+@Where(clause = "deleted_at is null")
 public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id = null;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

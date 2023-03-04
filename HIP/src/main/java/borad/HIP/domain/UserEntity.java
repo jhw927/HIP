@@ -14,13 +14,13 @@ import java.time.Instant;
 @Table(name = "\"user\"") // db에는 이미 user라는 테이블이 있기에 "\""\"를 사용한다.
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE \"user\"  SET deleted_at = NOW() where id = ? ")
+@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() where id = ? ")
 @Where(clause = "deleted_at is null ")
 public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id = null;
     @Column(name = "user_name")
     private String userName;
     @Column(name = "password")

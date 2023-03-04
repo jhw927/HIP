@@ -50,12 +50,15 @@ public class PostService {
     public void delete(String userName, Long postId) {
         UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(() ->
                 new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+        try {
 
-        PostEntity post = postRepository.findById(postId).orElseThrow(() -> new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
 
-        if (post.getUser() != user) {
-            throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
-        }
-        postRepository.delete(post);
+            PostEntity post = postRepository.findById(postId).orElseThrow(() -> new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+
+            if (post.getUser() != user) {
+                throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
+            }
+            postRepository.delete(post);
+        }catch (RuntimeException e){}
     }
 }
