@@ -2,8 +2,6 @@ package borad.HIP.controller;
 
 import borad.HIP.controller.request.PostModifyRequest;
 import borad.HIP.controller.request.PostRequest;
-import borad.HIP.controller.request.UserJoinRequest;
-import borad.HIP.domain.PostEntity;
 import borad.HIP.exception.ErrorCode;
 import borad.HIP.exception.SnsException;
 import borad.HIP.fixture.PostEntityFixture;
@@ -20,8 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -47,13 +43,9 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void 포스트작성() throws Exception {
-
-        String title = "title";
-        String body = "body";
-
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objMapper.writeValueAsBytes(new PostRequest(title, body)))
+                        .content(objMapper.writeValueAsBytes(new PostRequest("title", "body")))
                 ).andDo(print())
                 .andExpect(status().isOk());
     }
@@ -62,11 +54,9 @@ public class PostControllerTest {
     @WithAnonymousUser
     void 포스트작성시_로그인하지않은경우() throws Exception {
 
-        String title = "title";
-        String body = "body";
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objMapper.writeValueAsBytes(new PostRequest(title, body)))
+                        .content(objMapper.writeValueAsBytes(new PostRequest("title", "body")))
                 ).andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
     }
@@ -196,10 +186,11 @@ public class PostControllerTest {
                 ).andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
     }
+
     @Test
     @WithMockUser
     void 내피드목록() throws Exception {
-        when(postService.my(any(),any())).thenReturn(Page.empty());
+        when(postService.my(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(post("/api/v1/posts/my")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
@@ -213,5 +204,33 @@ public class PostControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
+    }
+
+    @Test
+    @WithMockUser
+    void 좋아요기능() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 좋아요버튼클릭시_로그인하지_않은경우() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 좋아요버튼클릭시_게시물이_존재하지_않은경우() throws Exception {
+        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(), any());
+        mockMvc.perform(post("/api/v1/posts/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isNotFound());
     }
 }

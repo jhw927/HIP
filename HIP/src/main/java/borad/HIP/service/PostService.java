@@ -1,10 +1,12 @@
 package borad.HIP.service;
 
+import borad.HIP.domain.LikeEntity;
 import borad.HIP.model.Post;
 import borad.HIP.domain.PostEntity;
 import borad.HIP.domain.UserEntity;
 import borad.HIP.exception.ErrorCode;
 import borad.HIP.exception.SnsException;
+import borad.HIP.repository.LikeEntityRepository;
 import borad.HIP.repository.PostEntityRepository;
 import borad.HIP.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +15,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostEntityRepository postRepository;
     private final UserEntityRepository userEntityRepository;
+    private final LikeEntityRepository likeRepo;
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -29,6 +34,7 @@ public class PostService {
         // 포스트 저장
         postRepository.save(PostEntity.of(title, body, user));
     }
+
     @Transactional
     public Post modify(String title, String body, String userName, Long id) {
         // 유저확인
@@ -52,21 +58,46 @@ public class PostService {
     public void delete(String userName, Long postId) {
         UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(() ->
                 new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
-            PostEntity post = postRepository.findById(postId).orElseThrow(() -> new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity post = postRepository.findById(postId).orElseThrow(() -> new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
 
-            if (post.getUser() != user) {
-                throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
-            }
-            postRepository.delete(post);
+        if (post.getUser() != user) {
+            throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
+        }
+        postRepository.delete(post);
     }
-    public Page<Post> list(Pageable pageable){
+
+    public Page<Post> list(Pageable pageable) {
         return postRepository.findAll(pageable).map(Post::fromEntity);
     }
 
-    public Page<Post> my(String userName,Pageable pageable){
+    public Page<Post> my(String userName, Pageable pageable) {
         UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(() ->
                 new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
 
-        return postRepository.findAllByUser(user,pageable).map(Post::fromEntity);
+        return postRepository.findAllByUser(user, pageable).map(Post::fromEntity);
+    }
+
+    @Transactional
+    public void like(Long postId, String userName) {
+        UserEntity user = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+                new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+        PostEntity post = postRepository.findById(postId).orElseThrow(() ->
+                new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+
+        // 좋아요 체크
+        likeRepo.findByUserAndPost(user, post).ifPresent(it -> {
+            throw new SnsException(ErrorCode.ALREADY_LIKE_CHECKED, String.format("userName %s already like post %d", userName, postId));
+        });
+
+        likeRepo.save(LikeEntity.of(post, user));
+    }
+
+    public int likeCnt(Long postId) {
+        PostEntity post = postRepository.findById(postId).orElseThrow(() ->
+                new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        // 좋아요 수 체크
+//        List<LikeEntity> likes = likeRepo.findAllByPost(post);
+//        return likes.size();
+        return likeRepo.countByPost(post);
     }
 }
