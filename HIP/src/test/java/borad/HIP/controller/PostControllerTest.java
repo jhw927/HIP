@@ -1,5 +1,6 @@
 package borad.HIP.controller;
 
+import borad.HIP.controller.request.PostCommentRequest;
 import borad.HIP.controller.request.PostModifyRequest;
 import borad.HIP.controller.request.PostRequest;
 import borad.HIP.exception.ErrorCode;
@@ -217,7 +218,7 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 좋아요버튼클릭시_로그인하지_않은경우() throws Exception {
-        mockMvc.perform(post("/api/v1/posts/likes")
+        mockMvc.perform(post("/api/v1/posts/1/likes")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -227,7 +228,37 @@ public class PostControllerTest {
     @WithAnonymousUser
     void 좋아요버튼클릭시_게시물이_존재하지_않은경우() throws Exception {
         doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(), any());
-        mockMvc.perform(get("/api/v1/posts/likes")
+        mockMvc.perform(get("/api/v1/posts/1/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    @WithMockUser
+    void 댓글기능() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 댓글작성시_로그인하지_않은경우() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 댓글작성시_게시물이_존재하지_않은경우() throws Exception {
+        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any());
+        mockMvc.perform(get("/api/v1/posts/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isNotFound());

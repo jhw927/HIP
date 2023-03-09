@@ -100,4 +100,9 @@ public class PostService {
 //        return likes.size();
         return likeRepo.countByPost(post);
     }
+
+    @Transactional
+    public void comment(Long postId,String userName){
+
+    }
 }
