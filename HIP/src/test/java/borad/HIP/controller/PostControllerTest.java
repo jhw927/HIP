@@ -257,7 +257,7 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 댓글작성시_게시물이_존재하지_않은경우() throws Exception {
-        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any());
+        doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any(),any());
         mockMvc.perform(get("/api/v1/posts/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
