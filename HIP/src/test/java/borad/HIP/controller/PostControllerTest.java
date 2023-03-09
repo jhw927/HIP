@@ -22,8 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,8 +44,8 @@ public class PostControllerTest {
     void 포스트작성() throws Exception {
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objMapper.writeValueAsBytes(new PostRequest("title", "body")))
-                ).andDo(print())
+                        .content(objMapper.writeValueAsBytes(new PostRequest("title", "body"))))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -84,7 +83,7 @@ public class PostControllerTest {
 
         String title = "title";
         String body = "body";
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(put("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objMapper.writeValueAsBytes(new PostRequest(title, body)))
                 ).andDo(print())
@@ -127,7 +126,7 @@ public class PostControllerTest {
     @WithMockUser
     void 포스트삭제() throws Exception {
 
-        mockMvc.perform(put("/api/v1/posts/1")
+        mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isOk());
@@ -137,7 +136,7 @@ public class PostControllerTest {
     @WithAnonymousUser
     void 포스트삭제시_로그인하지않은경우() throws Exception {
 
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
 
                 ).andDo(print())
@@ -150,7 +149,7 @@ public class PostControllerTest {
 
         doThrow(new SnsException(ErrorCode.INVALID_PERMISSION)).when(postService).delete(any(), any());
 
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -161,7 +160,7 @@ public class PostControllerTest {
     void 포스트삭제시_삭제하려는_게시글이_존재하지_않은경우() throws Exception {
         doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(), any());
 
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isNotFound());
@@ -172,7 +171,7 @@ public class PostControllerTest {
     void 피드목록() throws Exception {
 
         when(postService.list(any())).thenReturn(Page.empty());
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(get("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isOk());
@@ -181,7 +180,7 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 피드목록요청시_로그인하지않은경우() throws Exception {
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(get("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
@@ -191,7 +190,7 @@ public class PostControllerTest {
     @WithMockUser
     void 내피드목록() throws Exception {
         when(postService.my(any(), any())).thenReturn(Page.empty());
-        mockMvc.perform(post("/api/v1/posts/my")
+        mockMvc.perform(get("/api/v1/posts/my")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isOk());
@@ -200,7 +199,7 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 내피드목록요청시_로그인하지않은경우() throws Exception {
-        mockMvc.perform(post("/api/v1/posts/my")
+        mockMvc.perform(get("/api/v1/posts/my")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
@@ -228,7 +227,7 @@ public class PostControllerTest {
     @WithAnonymousUser
     void 좋아요버튼클릭시_게시물이_존재하지_않은경우() throws Exception {
         doThrow(new SnsException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(), any());
-        mockMvc.perform(post("/api/v1/posts/likes")
+        mockMvc.perform(get("/api/v1/posts/likes")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isNotFound());
