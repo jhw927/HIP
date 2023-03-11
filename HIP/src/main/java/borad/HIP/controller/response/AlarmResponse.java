@@ -15,7 +15,7 @@ public class AlarmResponse {
 
     private Long id;
     private AlarmType alarmType;
-    private AlarmArgs args;
+//    private AlarmArgs args;
     private String text;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
@@ -25,7 +25,7 @@ public class AlarmResponse {
         return new AlarmResponse(
                 alarm.getId(),
                 alarm.getAlarmType(),
-                alarm.getArgs(),
+//                alarm.getArgs(),
                 alarm.getAlarmType().getAlarmText(),
                 alarm.getRegisteredAt(),
                 alarm.getUpdatedAt(),

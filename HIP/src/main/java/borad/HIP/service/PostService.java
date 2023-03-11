@@ -82,7 +82,7 @@ public class PostService {
 
         likeRepo.save(LikeEntity.of(post, user));
 
-        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_LIKE_ON_POST,new AlarmArgs(user.getId(),post.getId())));
+        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_LIKE_ON_POST));
     }
 
     public int likeCnt(Long postId) {
@@ -101,7 +101,7 @@ public class PostService {
         // comment save
         commentRepo.save(CommentEntity.of(post,user,comment));
         // 알람 발생
-        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_COMMENT_ON_POST,new AlarmArgs(user.getId(),post.getId())));
+        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_COMMENT_ON_POST));
     }
 
 //    자주 사용되는 post 존재 확인 및 유저 확인 로직을 메소드로 따로 만듬 > 코드의 반복 저하

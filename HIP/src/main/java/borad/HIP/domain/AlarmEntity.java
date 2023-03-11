@@ -18,7 +18,7 @@ import java.time.Instant;
 @Table(name = "\"alarm\"", indexes = {
         @Index(name = "user_id_idx",columnList = "user_id")
 })
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+//@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @SQLDelete(sql = "UPDATE post SET deleted_at = NOW() WHERE id=?")
 @Where(clause = "deleted_at is null")
 public class AlarmEntity {
@@ -35,9 +35,9 @@ public class AlarmEntity {
     private AlarmType alarmType;
 
 
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "json")
-    private AlarmArgs args;
+//    @Type(type = "jsonb")
+//    @Column(columnDefinition = "json")
+//    private AlarmArgs args;
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;
@@ -58,11 +58,17 @@ public class AlarmEntity {
         this.updatedAt=Timestamp.from(Instant.now());
     }
 
-    public static AlarmEntity of(UserEntity userEntity,AlarmType alarmType ,AlarmArgs args){
+//    public static AlarmEntity of(UserEntity userEntity,AlarmType alarmType ,AlarmArgs args){
+//        AlarmEntity entity = new AlarmEntity();
+//        entity.setUser(userEntity);
+//        entity.setAlarmType(alarmType);
+//        entity.setArgs(args);
+//        return entity;
+//    }
+    public static AlarmEntity of(UserEntity userEntity,AlarmType alarmType){
         AlarmEntity entity = new AlarmEntity();
         entity.setUser(userEntity);
         entity.setAlarmType(alarmType);
-        entity.setArgs(args);
         return entity;
     }
 

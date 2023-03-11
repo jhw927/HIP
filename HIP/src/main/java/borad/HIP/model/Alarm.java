@@ -15,7 +15,7 @@ public class Alarm {
     private Long id;
     private User user;
     private AlarmType alarmType;
-    private AlarmArgs args;
+//    private AlarmArgs args;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
     private Timestamp deletedAt;
@@ -25,7 +25,7 @@ public class Alarm {
                 entity.getId(),
                 User.fromEntity(entity.getUser()),
                 entity.getAlarmType(),
-                entity.getArgs(),
+//                entity.getArgs(),
                 entity.getRegisteredAt(),
                 entity.getUpdatedAt(),
                 entity.getDeletedAt()
