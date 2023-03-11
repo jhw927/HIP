@@ -13,7 +13,8 @@ public enum ErrorCode {
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED,"Permission is Invalid"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
 
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Internal server error")
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Internal server error"),
+    ALREADY_LIKE_CHECKED(HttpStatus.CONFLICT,"User already like checked")
     ;
 
     private HttpStatus status;

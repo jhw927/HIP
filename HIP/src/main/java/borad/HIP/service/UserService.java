@@ -1,19 +1,23 @@
 package borad.HIP.service;
 
+import borad.HIP.domain.AlarmArgs;
 import borad.HIP.domain.UserEntity;
 import borad.HIP.exception.ErrorCode;
 import borad.HIP.exception.SnsException;
+import borad.HIP.model.Alarm;
 import borad.HIP.model.User;
+import borad.HIP.repository.AlarmEntityRepository;
 import borad.HIP.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import util.JwtTokenUtils;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final AlarmEntityRepository alarmRepo;
 
 
     @Value("${jwt.secret-key}")
@@ -63,5 +68,11 @@ public class UserService {
         String token = JwtTokenUtils.generateToken(userName,secretKey,expiredTimeMs);
         return token;
 
+    }
+    public Page<Alarm> alarmList(String userName, Pageable pageable){
+        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+                new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
+
+        return alarmRepo.findAllByUser(userEntity,pageable).map(Alarm::fromEntity);
     }
 }
