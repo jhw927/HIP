@@ -1,24 +1,16 @@
 package borad.HIP.service;
 
-import borad.HIP.domain.CommentEntity;
-import borad.HIP.domain.LikeEntity;
+import borad.HIP.domain.*;
 import borad.HIP.model.Comment;
 import borad.HIP.model.Post;
-import borad.HIP.domain.PostEntity;
-import borad.HIP.domain.UserEntity;
 import borad.HIP.exception.ErrorCode;
 import borad.HIP.exception.SnsException;
-import borad.HIP.repository.CommentEntityRepository;
-import borad.HIP.repository.LikeEntityRepository;
-import borad.HIP.repository.PostEntityRepository;
-import borad.HIP.repository.UserEntityRepository;
+import borad.HIP.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +19,8 @@ public class PostService {
     private final PostEntityRepository postRepository;
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeRepo;
-
     private final CommentEntityRepository commentRepo;
+    private final AlarmEntityRepository alarmRepo;
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -89,6 +81,8 @@ public class PostService {
         });
 
         likeRepo.save(LikeEntity.of(post, user));
+
+        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_LIKE_ON_POST,new AlarmArgs(user.getId(),post.getId())));
     }
 
     public int likeCnt(Long postId) {
@@ -106,6 +100,8 @@ public class PostService {
 
         // comment save
         commentRepo.save(CommentEntity.of(post,user,comment));
+        // 알람 발생
+        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_COMMENT_ON_POST,new AlarmArgs(user.getId(),post.getId())));
     }
 
 //    자주 사용되는 post 존재 확인 및 유저 확인 로직을 메소드로 따로 만듬 > 코드의 반복 저하
