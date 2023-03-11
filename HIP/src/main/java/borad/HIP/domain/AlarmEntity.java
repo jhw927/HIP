@@ -27,7 +27,7 @@ public class AlarmEntity {
     private Long id = null;
 
     //알람을 받는 살람
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // n+1 문제 방지
     @JoinColumn(name = "user_id")
     private UserEntity user;
 

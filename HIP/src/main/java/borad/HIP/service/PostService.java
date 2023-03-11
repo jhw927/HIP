@@ -57,6 +57,8 @@ public class PostService {
         if (post.getUser() != user) {
             throw new SnsException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
         }
+        likeRepo.deleteAllByPost(post);
+        commentRepo.deleteAllByPost(post);
         postRepository.delete(post);
     }
 
@@ -85,7 +87,7 @@ public class PostService {
         alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_LIKE_ON_POST));
     }
 
-    public int likeCnt(Long postId) {
+    public long likeCnt(Long postId) {
         PostEntity post = getPostOrException(postId);
         // 좋아요 수 체크
 //        List<LikeEntity> likes = likeRepo.findAllByPost(post);

@@ -69,10 +69,12 @@ public class UserService {
         return token;
 
     }
-    public Page<Alarm> alarmList(String userName, Pageable pageable){
-        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
-                new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
+    public Page<Alarm> alarmList(Long userId, Pageable pageable){
+//    public Page<Alarm> alarmList(String userName, Pageable pageable){
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
 
-        return alarmRepo.findAllByUser(userEntity,pageable).map(Alarm::fromEntity);
+//        return alarmRepo.findAllByUser(userEntity,pageable).map(Alarm::fromEntity);
+        return alarmRepo.findAllByUserId(userId, pageable).map(Alarm::fromEntity);
     }
 }

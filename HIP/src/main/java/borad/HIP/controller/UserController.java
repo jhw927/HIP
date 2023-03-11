@@ -6,6 +6,8 @@ import borad.HIP.controller.response.AlarmResponse;
 import borad.HIP.controller.response.Response;
 import borad.HIP.controller.response.UserJoinResponse;
 import borad.HIP.controller.response.UserLoginResponse;
+import borad.HIP.exception.ErrorCode;
+import borad.HIP.exception.SnsException;
 import borad.HIP.model.User;
 import borad.HIP.service.UserService;
 import lombok.Getter;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import util.ClassUtils;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -36,6 +39,8 @@ public class UserController {
 
     @GetMapping("/alarm")
     public Response<Page<AlarmResponse>> alarm(Pageable pageable, Authentication auth){
-        return Response.success(userService.alarmList(auth.getName(),pageable).map(AlarmResponse::fromAlarm));
+        User user = ClassUtils.getSafeCastInstance(auth.getPrincipal(),User.class).orElseThrow(()->
+                new SnsException(ErrorCode.INTERNAL_SERVER_ERROR,"Casting to USer class failed"));
+        return Response.success(userService.alarmList(user.getId(),pageable).map(AlarmResponse::fromAlarm));
     }
 }
