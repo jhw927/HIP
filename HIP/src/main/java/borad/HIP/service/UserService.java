@@ -7,6 +7,7 @@ import borad.HIP.exception.SnsException;
 import borad.HIP.model.Alarm;
 import borad.HIP.model.User;
 import borad.HIP.repository.AlarmEntityRepository;
+import borad.HIP.repository.UserCacheRepository;
 import borad.HIP.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import util.JwtTokenUtils;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final UserCacheRepository userCacheRepository;
     private final AlarmEntityRepository alarmRepo;
 
 
@@ -36,15 +38,18 @@ public class UserService {
 
     private final BCryptPasswordEncoder encoder;
 
-    public User loadUserByUserName(String userName){
-        return userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
-                new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded",userName)));
+    public User loadUserByUserName(String userName) {
+        return userCacheRepository.getUser(userName).orElseGet(() ->
+                userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(() ->
+                        new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)))
+        );
     }
+
     @Transactional
-    public User join(String userName,String password){
+    public User join(String userName, String password) {
         // 회원가입하려는 userName으로 user가 있는지 조회
-        userEntityRepository.findByUserName(userName).ifPresent(it ->{
-            throw new SnsException(ErrorCode.DUPLICATED_USER_NAME,String.format("%s이 중복되었습니다.",userName));
+        userEntityRepository.findByUserName(userName).ifPresent(it -> {
+            throw new SnsException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s이 중복되었습니다.", userName));
         });
 
         // 회원가입 진행
@@ -54,22 +59,26 @@ public class UserService {
 
         return User.fromEntity(userEntity);
     }
-    public String login(String userName, String password){
+
+    public String login(String userName, String password) {
         // 회원가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(()->new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() -> new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+        User user = loadUserByUserName(userName);
+        userCacheRepository.setUser(user);
         // 비밀번호 체크
-        if(!encoder.matches(password,userEntity.getPassword())){
+        if (!encoder.matches(password, user.getPassword())) {
 
 //        if(!userEntity.getPassword().equals(password)){
-            throw new SnsException(ErrorCode.INVALID_PASSWORD,"");
+            throw new SnsException(ErrorCode.INVALID_PASSWORD, "");
         }
 
         // 토큰 생성
-        String token = JwtTokenUtils.generateToken(userName,secretKey,expiredTimeMs);
+        String token = JwtTokenUtils.generateToken(userName, secretKey, expiredTimeMs);
         return token;
 
     }
-    public Page<Alarm> alarmList(Long userId, Pageable pageable){
+
+    public Page<Alarm> alarmList(Long userId, Pageable pageable) {
 //    public Page<Alarm> alarmList(String userName, Pageable pageable){
 //        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
 //                new SnsException(ErrorCode.USER_NOT_FOUND,String.format("%s not found",userName)));
