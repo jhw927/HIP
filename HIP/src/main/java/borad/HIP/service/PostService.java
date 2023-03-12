@@ -22,6 +22,8 @@ public class PostService {
     private final CommentEntityRepository commentRepo;
     private final AlarmEntityRepository alarmRepo;
 
+    private final AlarmService alarmService;
+
     @Transactional
     public void create(String title, String body, String userName) {
         // 유저확인
@@ -84,7 +86,8 @@ public class PostService {
 
         likeRepo.save(LikeEntity.of(post, user));
 
-        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_LIKE_ON_POST));
+        AlarmEntity alarm = alarmRepo.save(AlarmEntity.of(post.getUser(), AlarmType.NEW_LIKE_ON_POST));
+        alarmService.send(alarm.getId(), post.getUser().getId());
     }
 
     public long likeCnt(Long postId) {
@@ -96,29 +99,32 @@ public class PostService {
     }
 
     @Transactional
-    public void comment(Long postId,String comment,String userName){
+    public void comment(Long postId, String comment, String userName) {
         UserEntity user = getUserOrException(userName);
         PostEntity post = getPostOrException(postId);
 
         // comment save
-        commentRepo.save(CommentEntity.of(post,user,comment));
+        commentRepo.save(CommentEntity.of(post, user, comment));
         // 알람 발생
-        alarmRepo.save(AlarmEntity.of(post.getUser(),AlarmType.NEW_COMMENT_ON_POST));
+        AlarmEntity alarm = alarmRepo.save(AlarmEntity.of(post.getUser(), AlarmType.NEW_COMMENT_ON_POST));
+        alarmService.send(alarm.getId(), post.getUser().getId());
+
     }
 
-//    자주 사용되는 post 존재 확인 및 유저 확인 로직을 메소드로 따로 만듬 > 코드의 반복 저하
-    private PostEntity getPostOrException(Long postId){
-        return  postRepository.findById(postId).orElseThrow(() ->
+    //    자주 사용되는 post 존재 확인 및 유저 확인 로직을 메소드로 따로 만듬 > 코드의 반복 저하
+    private PostEntity getPostOrException(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() ->
                 new SnsException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
     }
-    private UserEntity getUserOrException(String userName){
+
+    private UserEntity getUserOrException(String userName) {
         return userEntityRepository.findByUserName(userName).orElseThrow(() ->
                 new SnsException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
     }
 
     public Page<Comment> getComment(Long postId, Pageable pageable) {
         PostEntity post = getPostOrException(postId);
-        return commentRepo.findAllByPost(post,pageable).map(Comment::fromEntity);
+        return commentRepo.findAllByPost(post, pageable).map(Comment::fromEntity);
 
     }
 }

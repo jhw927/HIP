@@ -14,7 +14,8 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Internal server error"),
-    ALREADY_LIKE_CHECKED(HttpStatus.CONFLICT,"User already like checked")
+    ALREADY_LIKE_CHECKED(HttpStatus.CONFLICT,"User already like checked"),
+    ALARM_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Connecting alarm occurs error ")
     ;
 
     private HttpStatus status;
